@@ -12,6 +12,7 @@
 int plugin_width = 200,
 plugin_height = 200;
 
+
 //==============================================================================
 SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)

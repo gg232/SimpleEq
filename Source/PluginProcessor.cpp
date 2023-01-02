@@ -13,32 +13,50 @@
 #include "PluginEditor.h"
 #include <iostream>
 
-auto low_cut_freq_parameter_ID = "LowCut freq",
-     low_cut_freq_parameter_name = "LowCut freq";
-float low_cut_freq_default_value = 20.f,
-      low_cut_freq_skewFactor = 1.f;
+/*
+#define low_cut_freq_string "LowCut Freq"
+#define low_cut_slope_string "LowCut Slope"
+#define N_low_cut_freq_default_value 20.f
+#define N_low_cut_freq_skewFactor 1.f
 
-auto high_cut_freq_parameter_ID = "HighCut Freq",
-high_cut_freq_parameter_name = "HighCut Freq";
-float high_cut_freq_default_value = 20000.f,
-high_cut_freq_skewFactor = 1.f;
+#define high_cut_freq_string "HighCut Freq"
+#define high_cut_slope_string "HighCut Slope"
+#define N_high_cut_freq_default_value 20000.f
+#define N_high_cut_freq_skewFactor 1.f
 
-auto PK_freq_parameter_ID = "Peak Freq",
-PK_freq_parameter_name = "Peak Freq";
-float PK_freq_default_value = 750.f,
-PK_freq_skewFactor = 1.f;
+#define PK_freq_string "Peak Freq"
+#define PK_gain_string "Peak Gain"
+#define PK_Q_string "Peak Q"
+#define N_PK_freq_default_value 750.f
+#define N_PK_freq_SkewFactor 1.f
+*/
 
-auto PK_gain_parameter_ID = "Peak Gain",
-PK_gain_parameter_name = "Peak Gain";
+auto low_cut_freq_parameter_ID = low_cut_freq_string,
+     low_cut_freq_parameter_name = low_cut_freq_string;
+float low_cut_freq_default_value = N_low_cut_freq_default_value,
+      low_cut_freq_skewFactor = N_low_cut_freq_skewFactor;
 
-auto PK_Q_parameter_ID = "Peak Q",
-PK_Q_parameter_name = "Peak Q";
+auto high_cut_freq_parameter_ID = high_cut_freq_string,
+high_cut_freq_parameter_name = high_cut_freq_string;
+float high_cut_freq_default_value = N_high_cut_freq_default_value,
+high_cut_freq_skewFactor = N_high_cut_freq_skewFactor;
 
-auto low_cut_slope_parameter_ID = "LowCut Slope",
-low_cut_slope_parameter_name = "LowCut Slope";
+auto PK_freq_parameter_ID = PK_freq_string,
+PK_freq_parameter_name = PK_freq_string;
+float PK_freq_default_value = N_PK_freq_default_value,
+PK_freq_skewFactor = N_PK_freq_SkewFactor;
 
-auto high_cut_slope_parameter_ID = "HighCut Slope",
-high_cut_slope_parameter_name = "HighCut Slope";
+auto PK_gain_parameter_ID = PK_gain_string,
+PK_gain_parameter_name = PK_gain_string;
+
+auto PK_Q_parameter_ID = PK_Q_string,
+PK_Q_parameter_name = PK_Q_string;
+
+auto low_cut_slope_parameter_ID = low_cut_slope_string,
+low_cut_slope_parameter_name = low_cut_slope_string;
+
+auto high_cut_slope_parameter_ID = high_cut_slope_string,
+high_cut_slope_parameter_name = high_cut_slope_string;
 
 
 //==============================================================================

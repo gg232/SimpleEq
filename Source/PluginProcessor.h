@@ -10,6 +10,22 @@
 
 #include <JuceHeader.h>
 
+#define low_cut_freq_string "LowCut Freq"
+#define low_cut_slope_string "LowCut Slope"
+#define N_low_cut_freq_default_value 20.f
+#define N_low_cut_freq_skewFactor 1.f
+
+#define high_cut_freq_string "HighCut Freq"
+#define high_cut_slope_string "HighCut Slope"
+#define N_high_cut_freq_default_value 20000.f
+#define N_high_cut_freq_skewFactor 1.f
+
+#define PK_freq_string "Peak Freq"
+#define PK_gain_string "Peak Gain"
+#define PK_Q_string "Peak Q"
+#define N_PK_freq_default_value 750.f
+#define N_PK_freq_SkewFactor 1.f
+
 using APVTS = juce::AudioProcessorValueTreeState;
 
 enum Slope
