@@ -355,6 +355,11 @@ void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     auto& rightLowCut = rightChain.get
         <ChainPositions::LowCut>();
 
+    updateCutFilter(rightLowCut,
+        cutCoefficients,
+        chainSettings);
+
+    /*
     rightLowCut.setBypassed<0>(true);
     rightLowCut.setBypassed<1>(true);
     rightLowCut.setBypassed<2>(true);
@@ -390,6 +395,7 @@ void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
             rightLowCut.setBypassed<0>(false);
         }
     }
+    */
 
     juce::dsp::AudioBlock<float> block(buffer);
     

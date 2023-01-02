@@ -118,40 +118,46 @@ private:
         auto& leftLowCut = leftChain.get
             <ChainPositions::LowCut>();
             */
-        leftLowCut.setBypassed<0>(true);
-        leftLowCut.setBypassed<1>(true);
-        leftLowCut.setBypassed<2>(true);
-        leftLowCut.setBypassed<3>(true);
+
+        /*
+        Supposedly we "need" to call these with keyword "template", but I compiled it w/out and it worked just fine.
+        Let's leave it in unless it causes problems down the road
+        */
+
+        leftLowCut.template setBypassed<0>(true);
+        leftLowCut.template setBypassed<1>(true);
+        leftLowCut.template setBypassed<2>(true);
+        leftLowCut.template setBypassed<3>(true);
 
         switch (chainSettings.lowCutSlope)
         {
-        case Slope_48:
-        {
-            *leftLowCut.get<3>().coefficients
-                = *cutCoefficients[3];
-            leftLowCut.setBypassed<3>(false);
-        }
+            case Slope_48:
+            {
+                *leftLowCut.template get<3>().coefficients
+                    = *cutCoefficients[3];
+                leftLowCut.template setBypassed<3>(false);
+            }
 
-        case Slope_36:
-        {
-            *leftLowCut.get<2>().coefficients =
-                *cutCoefficients[2];
-            leftLowCut.setBypassed<2>(false);
-        }
+            case Slope_36:
+            {
+                *leftLowCut.template get<2>().coefficients =
+                    *cutCoefficients[2];
+                leftLowCut.template setBypassed<2>(false);
+            }
 
-        case Slope_24:
-        {
-            *leftLowCut.get<1>().coefficients =
-                *cutCoefficients[1];
-            leftLowCut.setBypassed<1>(false);
-        }
+            case Slope_24:
+            {
+                *leftLowCut.template get<1>().coefficients =
+                    *cutCoefficients[1];
+                leftLowCut.template setBypassed<1>(false);
+            }
 
-        case Slope_12:
-        {
-            *leftLowCut.get<0>().coefficients =
-                *cutCoefficients[0];
-            leftLowCut.setBypassed<0>(false);
-        }
+            case Slope_12:
+            {
+                *leftLowCut.template get<0>().coefficients =
+                    *cutCoefficients[0];
+                leftLowCut.template setBypassed<0>(false);
+            }
         }
     }
     //==============================================================================
