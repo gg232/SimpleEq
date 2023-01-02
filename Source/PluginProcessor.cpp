@@ -148,16 +148,7 @@ void SimpleEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     Reference-counted wrapper around an array
     Allocated on the heap (personal note: not optimal, better to allocate on stack!)
     */
-    auto peakCoefficients = coeffs::makePeakFilter(
-            sampleRate, chainSettings.peakFreq, chainSettings.peakQuality, 
-        dB::decibelsToGain(chainSettings.peakGainInDecibels));
-
-    
-
-    *leftChain.get<ChainPositions::Peak>().coefficients
-        = *peakCoefficients;
-    *rightChain.get<ChainPositions::Peak>().coefficients
-        = *peakCoefficients;
+    updatePeakFilter(chainSettings);
 
     auto cutCoefficients = 
         juce::dsp::FilterDesign<float>
@@ -307,15 +298,7 @@ void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     Reference-counted wrapper around an array
     Allocated on the heap (?!?)
     */
-    auto peakCoefficients = coeffs::makePeakFilter(
-        getSampleRate(), chainSettings.peakFreq, chainSettings.peakQuality,
-        dB::decibelsToGain(chainSettings.peakGainInDecibels));
-    
-
-    *leftChain.get<ChainPositions::Peak>().coefficients
-        = *peakCoefficients;
-    *rightChain.get<ChainPositions::Peak>().coefficients
-        = *peakCoefficients;
+    updatePeakFilter(chainSettings);
     
 
     auto cutCoefficients =
@@ -464,6 +447,10 @@ void add_knob(const char* knob_ID, const char* knob_name, float knob_default_val
             
 }
 
+void SimpleEQAudioProcessor::updateCoefficients(Coefficients& old, const Coefficients& replacements)
+{
+    *old = *replacements;
+}
 
 APVTS::ParameterLayout SimpleEQAudioProcessor::createParameterLayout()
 {
@@ -604,6 +591,31 @@ ChainSettings getChainSettings(APVTS& apvts)
 
     return settings;
 }
+
+void SimpleEQAudioProcessor::updatePeakFilter(const ChainSettings& chainSettings)
+{
+    using dB = juce::Decibels;
+    using coeffs = juce::dsp::IIR::Coefficients<float>;
+    auto peakCoefficients = coeffs::makePeakFilter(
+        getSampleRate(), chainSettings.peakFreq, chainSettings.peakQuality,
+        dB::decibelsToGain(chainSettings.peakGainInDecibels));
+
+    /*
+    *leftChain.get<ChainPositions::Peak>().coefficients
+        = *peakCoefficients;
+    *rightChain.get<ChainPositions::Peak>().coefficients
+        = *peakCoefficients;
+        */
+
+    updateCoefficients(
+        leftChain.get<ChainPositions::Peak>().coefficients,
+        peakCoefficients);
+    updateCoefficients(
+        rightChain.get<ChainPositions::Peak>().coefficients,
+        peakCoefficients);
+
+}
+
 
 //==============================================================================
 // This creates new instances of the plugin..
