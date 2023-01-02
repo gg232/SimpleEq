@@ -12,7 +12,13 @@
 
 using APVTS = juce::AudioProcessorValueTreeState;
 
-
+enum Slope
+{
+    Slope_12,
+    Slope_24,
+    Slope_36,
+    Slope_48
+};
 
 struct ChainSettings
 {
@@ -21,11 +27,11 @@ struct ChainSettings
         peakQuality{ 1.f },
         lowCutFreq{ 0.f },
         highCutFreq{ 0.f };
-    int lowCutSlope{ 0 }, highCutSlope{ 0 };
+    Slope lowCutSlope{ Slope_12 }, highCutSlope{ Slope_12 };
 
 };
 
-ChainSettings getChain(APVTS& apvts);
+ChainSettings getChainSettings(APVTS& apvts);
 
 //==============================================================================
 /**

@@ -13,14 +13,14 @@
 #include "PluginEditor.h"
 #include <iostream>
 
-auto HP_freq_parameter_ID = "HighCut Freq",
-     HP_freq_parameter_name = "HighCut Freq";
-float HP_freq_default_value = 20000.f,
+auto HP_freq_parameter_ID = "LowCut Freq",
+     HP_freq_parameter_name = "LowCut Freq";
+float HP_freq_default_value = 20.f,
       HP_freq_skewFactor = 1.f;
 
-auto LP_freq_parameter_ID = "LowCut Freq",
-LP_freq_parameter_name = "LowCut Freq";
-float LP_freq_default_value = 20.f,
+auto LP_freq_parameter_ID = "HighCut Freq",
+LP_freq_parameter_name = "HighCut Freq";
+float LP_freq_default_value = 20000.f,
 LP_freq_skewFactor = 1.f;
 
 auto PK_freq_parameter_ID = "Peak Freq",
@@ -34,11 +34,11 @@ PK_gain_parameter_name = "Peak Gain";
 auto PK_Q_parameter_ID = "Peak Q",
 PK_Q_parameter_name = "Peak Q";
 
-auto HP_slope_parameter_ID = "HighCut Slope",
-HP_slope_parameter_name = "HighCut Slope";
+auto HP_slope_parameter_ID = "LowCut Slope",
+HP_slope_parameter_name = "LowCut Slope";
 
-auto LP_slope_parameter_ID = "LowCut Slope",
-LP_slope_parameter_name = "LowCut Slope";
+auto LP_slope_parameter_ID = "HighCut Slope",
+LP_slope_parameter_name = "HighCut Slope";
 
 
 //==============================================================================
@@ -127,7 +127,7 @@ void SimpleEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    std::cout << "In prepareToPlay()\n";
+    
     //come up with specs for each channel/chain
     juce::dsp::ProcessSpec spec;
     spec.maximumBlockSize = samplesPerBlock;
@@ -138,7 +138,7 @@ void SimpleEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     leftChain.prepare(spec);
     rightChain.prepare(spec);
 
-    auto chainSettings = getChain(apvts);
+    auto chainSettings = getChainSettings(apvts);
 
     
     using dB = juce::Decibels;
@@ -146,7 +146,7 @@ void SimpleEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 
     /*
     Reference-counted wrapper around an array
-    Allocated on the heap (?!?)
+    Allocated on the heap (personal note: not optimal, better to allocate on stack!)
     */
     auto peakCoefficients = coeffs::makePeakFilter(
             sampleRate, chainSettings.peakFreq, chainSettings.peakQuality, 
@@ -154,10 +154,27 @@ void SimpleEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 
     
 
-    leftChain.get<ChainPositions::Peak>().coefficients
+    *leftChain.get<ChainPositions::Peak>().coefficients
         = *peakCoefficients;
-    rightChain.get<ChainPositions::Peak>().coefficients
+    *rightChain.get<ChainPositions::Peak>().coefficients
         = *peakCoefficients;
+
+    auto cutCoefficients = 
+        juce::dsp::FilterDesign<float>
+        ::designIIRHighpassHighOrderButterworthMethod
+        (chainSettings.lowCutFreq, sampleRate,
+        (chainSettings.lowCutSlope+1)*2);
+
+    auto& leftLowCut = leftChain.get
+        <ChainPositions::LowCut>();
+
+    leftLowCut.setBypassed<0>(true);
+    leftLowCut.setBypassed<1>(true);
+    leftLowCut.setBypassed<2>(true);
+    leftLowCut.setBypassed<3>(true);
+
+    
+
     
 }
 
@@ -210,7 +227,7 @@ void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
 
     //Always do audio processing before updating settings!
     
-    auto chainSettings = getChain(apvts);
+    auto chainSettings = getChainSettings(apvts);
 
     using dB = juce::Decibels;
     using coeffs = juce::dsp::IIR::Coefficients<float>;
@@ -224,9 +241,9 @@ void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
         dB::decibelsToGain(chainSettings.peakGainInDecibels));
     
 
-    leftChain.get<ChainPositions::Peak>().coefficients
+    *leftChain.get<ChainPositions::Peak>().coefficients
         = *peakCoefficients;
-    rightChain.get<ChainPositions::Peak>().coefficients
+    *rightChain.get<ChainPositions::Peak>().coefficients
         = *peakCoefficients;
         
     juce::dsp::AudioBlock<float> block(buffer);
@@ -253,7 +270,7 @@ bool SimpleEQAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SimpleEQAudioProcessor::createEditor()
 {
-    //return new SimpleEQAudioProcessorEditor (*this);
+    //retugetChainSettingsrn new SimpleEQAudioProcessorEditor (*this);
     return new juce::GenericAudioProcessorEditor(*this);
 }
 
@@ -281,10 +298,12 @@ void add_knob(const char* knob_ID, const char* knob_name, float knob_default_val
 
     NormalisableRange<float> normalisable_range =
         NormalisableRange<float>(range_min, range_max, range_spacing, knob_skewFactor);
-
+    //layout.add(std::make_unique<AudioParameterFloat>(knob_ID, knob_name, range_min, range_max, knob_default_value));
+        
     layout.add(std::make_unique<AudioParameterFloat>
         (knob_ID, knob_name,
             normalisable_range, knob_default_value));
+            
 }
 
 
@@ -297,48 +316,94 @@ APVTS::ParameterLayout SimpleEQAudioProcessor::createParameterLayout()
     using J_float = juce::AudioParameterFloat;
     
 
-
+    /*
     
     J_range normalisable_range =
         J_range(20.f,20000.f,1.f,LP_freq_skewFactor);
+    */
 
+    /*
     layout.add(std::make_unique<J_float>
         (LP_freq_parameter_ID, LP_freq_parameter_name,
          normalisable_range, LP_freq_default_value));
+    
+    */
+
+    /* //add_knob() usage:
+    add_knob(const char* knob_ID, const char* knob_name, 
+            float knob_default_value, float range_min,
+            float range_max, float range_spacing,
+            float knob_skewFactor, APVTS::ParameterLayout& layout)
+    */
+
+    //Low pass
+    add_knob(LP_freq_parameter_ID, LP_freq_parameter_name,
+            LP_freq_default_value, 20.f,
+            20000.f, 1.f,
+            0.25f, layout);
+
+    
 
     //High pass
-    add_knob(HP_freq_parameter_ID, 
-        HP_freq_parameter_name, HP_freq_default_value, 20.f, 20000.f, 1.f, 1.f, layout);
+    add_knob(HP_freq_parameter_ID, HP_freq_parameter_name,
+        HP_freq_default_value, 20.f,
+        20000.f, 1.f,
+        0.25f, layout);
     
+    
+
     //Peak
-    add_knob(PK_freq_parameter_ID, PK_freq_parameter_name, 750.f, 20.f, 20000.f, 1.f, 1.f, layout);
+    add_knob(PK_freq_parameter_ID, PK_freq_parameter_name,
+        PK_freq_default_value, 20.0f,
+        20000.f, 1.f,
+        0.25f, layout);
+
+    /* //add_knob() usage:
+    add_knob(const char* knob_ID, const char* knob_name, 
+            float knob_default_value, float range_min,
+            float range_max, float range_spacing,
+            float knob_skewFactor, APVTS::ParameterLayout& layout)
+    */
     
     //Peak gain
-    add_knob(PK_gain_parameter_ID, PK_gain_parameter_name, 0, 20.f, 20000.f, 0.5f, 1, layout);
-    
+    add_knob(PK_gain_parameter_ID, PK_gain_parameter_name,
+        0.f, -24.f,
+        24.f, 0.05f,
+        1.f, layout);
+
+    /* //add_knob() usage:
+    add_knob(const char* knob_ID, const char* knob_name,
+            float knob_default_value, float range_min,
+            float range_max, float range_spacing,
+            float knob_skewFactor, APVTS::ParameterLayout& layout)
+    */
+
     //Peak Q
-    add_knob(PK_Q_parameter_ID, PK_Q_parameter_name, 1.f, 0.1f, 10.f, 0.05f, 1.f, layout);
+    add_knob(PK_Q_parameter_ID, PK_Q_parameter_name,
+        1.0, 0.1f,
+        10.f, 0.05f,
+        1.f, layout);
 
     using J_StringArray = juce::StringArray;
     using J_String = juce::String;
     using J_choice = juce::AudioParameterChoice;
 
-    J_StringArray HP_LP_Q_string;
+    J_StringArray HP_LP_slope_string;
 
     for(int i = 0; i < 4; i++)
     {
         J_String str;
         str << (i + 1) * 12;
         str << " dB/Octave";
-        HP_LP_Q_string.add(str);
+        HP_LP_slope_string.add(str);
     }
 
-    int default_Q = 0;
+    int default_slope = 0;
 
     layout.add(std::make_unique<J_choice>
-        (HP_slope_parameter_ID, HP_slope_parameter_name, HP_LP_Q_string, default_Q));
+        (HP_slope_parameter_ID, HP_slope_parameter_name, HP_LP_slope_string, default_slope));
     layout.add(std::make_unique<J_choice>
-        (LP_slope_parameter_ID, LP_slope_parameter_name, HP_LP_Q_string, default_Q));
+        (LP_slope_parameter_ID, LP_slope_parameter_name, HP_LP_slope_string, default_slope));
 
 
     return layout;
@@ -356,7 +421,7 @@ This function gets parameters from the (internal) APVTS
 into my ChainSettings struct.
 
 */
-ChainSettings getChain(APVTS& apvts)
+ChainSettings getChainSettings(APVTS& apvts)
 {
     ChainSettings settings;
 
@@ -365,9 +430,10 @@ ChainSettings getChain(APVTS& apvts)
     settings.peakFreq = apvts.getRawParameterValue(PK_freq_parameter_ID)->load();
     settings.peakGainInDecibels = apvts.getRawParameterValue(PK_gain_parameter_ID)->load();
     settings.peakQuality = apvts.getRawParameterValue(PK_Q_parameter_ID)->load();
-    settings.lowCutSlope = apvts.getRawParameterValue(LP_slope_parameter_ID)->load();
-    settings.highCutSlope = apvts.getRawParameterValue(HP_slope_parameter_ID)->load();
+    settings.lowCutSlope = static_cast<Slope>(apvts.getRawParameterValue(LP_slope_parameter_ID)->load());
+    settings.highCutSlope = static_cast<Slope>(apvts.getRawParameterValue(HP_slope_parameter_ID)->load());
     /*
+    //This code breaks the program for some reason.
     settings.lowCutFreq = get_param(apvts, "LowCut Freq");
     settings.highCutFreq = get_param(apvts, "HighCut");
     settings.peakFreq = get_param(apvts, "Peak Freq");
