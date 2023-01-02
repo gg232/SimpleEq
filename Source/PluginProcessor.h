@@ -108,18 +108,6 @@ private:
         const Slope& lowCutSlope)
     {
         /*
-        auto cutCoefficients =
-            juce::dsp::FilterDesign<float>
-            ::designIIRHighpassHighOrderButterworthMethod
-            (chainSettings.lowCutFreq, getSampleRate(),
-                (chainSettings.lowCutSlope + 1) * 2);
-
-        //Left chain
-        auto& leftLowCut = leftChain.get
-            <ChainPositions::LowCut>();
-            */
-
-        /*
         Supposedly we "need" to call these with keyword "template", but I compiled it w/out and it worked just fine.
         Let's leave it in unless it causes problems down the road
         */
