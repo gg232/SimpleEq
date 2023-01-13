@@ -12,4 +12,4 @@ This plugin is, as of writing this, a personal project with the intention of tea
 There is none. I recommend you do not use this (yet) on professional projects.
 
 # License
-When it is released, it will be under one of the GPL's. I'll flesh this out later.
+When it is released, it will be under one of the GPL's. I'll flesh this out later. I'll offer the binaries for free when I have them.
