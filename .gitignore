@@ -212,3 +212,6 @@ JuceLibraryCode/JuceHeader.h
 JuceLibraryCode/JucePluginDefines.h
 JuceLibraryCode/ReadMe.txt
 LICENSE
+Builds/VisualStudio2019/x64/Debug/Shared Code/SimpleEQ.9514F971.tlog/CL.14780.write.1.tlog
+Builds/VisualStudio2019/.vs/SimpleEQ/v16/ipch/AutoPCH/7e670dacf5b8f27e/PLUGINEDITOR.ipch
+Builds/VisualStudio2019/.vs/SimpleEQ/v16/ipch/AutoPCH/b96089cbd7548aa3/PLUGINPROCESSOR.ipch

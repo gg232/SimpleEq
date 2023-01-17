@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="ThJQKe" name="SimpleEQ" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              companyWebsite="https://github.com/gg232/SimpleEq" companyName="Gerard Gallagher">
   <MAINGROUP id="ic2VBu" name="SimpleEQ">
     <GROUP id="{631AFAB8-61A2-38B7-5F6D-BC715B48277D}" name="Source">
       <FILE id="wD8nFX" name="PluginProcessor.cpp" compile="1" resource="0"
